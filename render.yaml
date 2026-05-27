@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: sentinelweb-backend
+    env: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: OLLAMA_ENABLED
+        value: "false"
+      - key: HEADLESS
+        value: "true"
+      - key: SENTINEL_INVENTORY_CACHE_TTL_S
+        value: "720"

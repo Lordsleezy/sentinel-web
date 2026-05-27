@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071013">
+  <meta name="color-scheme" content="dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="SentinelWeb">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="SentinelWeb">
+  <title>SentinelWeb</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./assets/icon-192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+  <link rel="apple-touch-startup-image" href="./assets/splash-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)">
+  <link rel="apple-touch-startup-image" href="./assets/splash-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
+  <link rel="apple-touch-startup-image" href="./assets/splash-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
+  <link rel="apple-touch-startup-image" href="./assets/splash-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
+  <link rel="apple-touch-startup-image" href="./assets/splash-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)">
+  <link rel="apple-touch-startup-image" href="./assets/splash-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">SentinelWeb</p>
+        <h1>Retail web check</h1>
+      </div>
+      <div class="health" id="healthBadge" aria-live="polite">
+        <span class="dot"></span>
+        <span>Checking</span>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="panel chat-panel" aria-label="Query workspace">
+        <div class="mode-tabs" role="tablist" aria-label="Query mode">
+          <button class="tab active" id="singleTab" type="button" role="tab" aria-selected="true">Single</button>
+          <button class="tab" id="compareTab" type="button" role="tab" aria-selected="false">Compare</button>
+          <button class="tab" id="inventoryTab" type="button" role="tab" aria-selected="false">Inventory</button>
+        </div>
+
+        <div class="messages" id="messages" aria-live="polite" aria-label="Conversation">
+          <article class="message assistant">
+            <div class="bubble">
+              Ask for stock, price, specs, install pricing, or service details. I will open the web, read the page, and bring back the answer.
+            </div>
+          </article>
+        </div>
+
+        <form class="composer" id="queryForm">
+          <div class="compare-fields" id="compareFields" hidden>
+            <label for="sitesInput">Sites to compare</label>
+            <textarea id="sitesInput" rows="3" placeholder="https://www.bestbuy.com&#10;https://www.walmart.com&#10;https://www.target.com"></textarea>
+          </div>
+
+          <div class="inventory-fields" id="inventoryFields" hidden>
+            <label for="locationInput">Store location</label>
+            <input id="locationInput" type="text" autocomplete="postal-code" placeholder="ZIP code, city, or store area">
+            <div class="provider-grid" aria-label="Retailers">
+              <label><input type="checkbox" name="inventoryProvider" value="bestbuy" checked> Best Buy</label>
+              <label><input type="checkbox" name="inventoryProvider" value="target" checked> Target</label>
+              <label><input type="checkbox" name="inventoryProvider" value="walmart" checked> Walmart</label>
+              <label><input type="checkbox" name="inventoryProvider" value="amazon" checked> Amazon</label>
+            </div>
+          </div>
+
+          <details class="url-details" id="urlDetails">
+            <summary>Target a specific site</summary>
+            <label for="urlInput">URL</label>
+            <input id="urlInput" type="url" inputmode="url" autocomplete="url" placeholder="https://www.example.com">
+          </details>
+
+          <label class="sr-only" for="queryInput">Query</label>
+          <div class="input-row">
+            <textarea id="queryInput" rows="1" required placeholder="Check if SKU 12345 is in stock at Best Buy"></textarea>
+            <button id="sendButton" type="submit" aria-label="Send query">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3.6 20.4 21 12 3.6 3.6l1.7 6.6 8.1 1.8-8.1 1.8-1.7 6.6Z"/></svg>
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <aside class="panel history-panel" aria-label="Recent queries">
+        <div class="panel-title">
+          <h2>History</h2>
+          <button class="ghost-button" id="clearHistoryButton" type="button">Clear</button>
+        </div>
+        <div class="history-list" id="historyList"></div>
+      </aside>
+    </main>
+  </div>
+
+  <template id="loadingTemplate">
+    <article class="message assistant loading-card">
+      <div class="bubble">
+        <div class="work-meter">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <div class="status-line" data-status>Opening browser...</div>
+        <div class="elapsed" data-elapsed>0s elapsed</div>
+      </div>
+    </article>
+  </template>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>

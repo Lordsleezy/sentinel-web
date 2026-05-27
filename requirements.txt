@@ -1,0 +1,25 @@
+# ── Web framework ─────────────────────────────────────────────────────────────
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+
+# ── HTTP client (Ollama API) ──────────────────────────────────────────────────
+httpx==0.27.2
+
+# ── Browser automation ────────────────────────────────────────────────────────
+playwright==1.49.0
+
+# ── Encryption (credential store) ─────────────────────────────────────────────
+cryptography==43.0.3
+
+# ── Data validation ───────────────────────────────────────────────────────────
+pydantic==2.10.3
+
+# ── Environment / config ──────────────────────────────────────────────────────
+python-dotenv==1.0.1
+
+# ── Standard library (no extra package needed) ─────────────────────────────────
+# sqlite3, json, re, asyncio, hashlib, time, logging, argparse
+
+# ── AI inference — ZERO paid APIs ─────────────────────────────────────────────
+# All AI via local Ollama at http://127.0.0.1:11434
+# Setup: ollama pull qwen2.5-coder:14b

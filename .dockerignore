@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+*.pyo
+*.log
+data/
+screenshots/
+webapp_mobile_check.png
