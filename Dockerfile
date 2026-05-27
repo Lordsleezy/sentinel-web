@@ -23,7 +23,6 @@ RUN apt-get update \
         fonts-liberation \
         fonts-noto-color-emoji \
         fonts-unifont \
-        fonts-ubuntu \
         libasound2t64 \
         libatk-bridge2.0-0 \
         libatk1.0-0 \
