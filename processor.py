@@ -17,7 +17,7 @@ import os
 load_dotenv()
 
 OLLAMA_URL   = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434") + "/api/generate"
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5-coder:14b")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
 
 logger = logging.getLogger(__name__)
 

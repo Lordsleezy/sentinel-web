@@ -4,6 +4,8 @@ import tempfile
 from pathlib import Path
 
 os.environ["OLLAMA_ENABLED"] = "false"
+os.environ["AI_HELPER_ENABLED"] = "false"
+os.environ["AI_HELPER_REQUIRED"] = "false"
 os.environ["SENTINEL_BETA_USERS"] = "cloud-test@example.com"
 os.environ["SENTINEL_INVENTORY_CACHE_TTL_S"] = "720"
 os.environ["ALLOWED_ORIGINS"] = (

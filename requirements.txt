@@ -22,4 +22,4 @@ python-dotenv==1.0.1
 
 # ── AI inference — ZERO paid APIs ─────────────────────────────────────────────
 # All AI via local Ollama at http://127.0.0.1:11434
-# Setup: ollama pull qwen2.5-coder:14b
+# Setup: ollama pull llama3.2:1b

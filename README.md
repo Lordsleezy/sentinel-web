@@ -14,7 +14,7 @@ pip install -r requirements.txt
 python -m playwright install chromium
 
 # 2. Pull Ollama model (one-time, ~8 GB)
-ollama pull qwen2.5-coder:14b
+ollama pull llama3.2:1b
 
 # 3. Start the server
 python main.py
@@ -236,5 +236,5 @@ Tests run entirely offline — no browser, no Ollama, no network needed.
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `OLLAMA_HOST` | `http://127.0.0.1:11434` | Ollama server URL |
-| `OLLAMA_MODEL` | `qwen2.5-coder:14b` | Model to use |
+| `OLLAMA_MODEL` | `llama3.2:1b` | Model to use |
 | `PORT` | `8766` | Server port |

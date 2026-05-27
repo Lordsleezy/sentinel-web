@@ -36,7 +36,7 @@ Cloudflare Tunnel should route the public hostname to `http://127.0.0.1:8766`.
 
 ```env
 OLLAMA_HOST=http://127.0.0.1:11434
-OLLAMA_MODEL=qwen2.5-coder:14b
+OLLAMA_MODEL=llama3.2:1b
 PORT=8766
 SENTINEL_BETA_USERS=user1@example.com,user2@example.com
 SENTINEL_INVENTORY_CACHE_TTL_S=720

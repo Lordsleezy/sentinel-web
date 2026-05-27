@@ -24,6 +24,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 import credentials as cred_store
+import ai_helper
 import processor
 import extractor
 import comparison as comp_engine
@@ -297,6 +298,8 @@ async def inventory_search(
             location=location,
             providers=providers,
         )
+    except inventory_service.AIHelperUnavailable:
+        raise HTTPException(status_code=503, detail="AI helper unavailable")
     except RuntimeError as exc:
         raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=str(exc))
 
@@ -361,12 +364,20 @@ async def delete_credentials(site: str):
 async def health():
     ollama_enabled = processor.is_ollama_enabled()
     ollama_ok = processor.check_ollama_connected() if ollama_enabled else False
+    ai_connected = ai_helper.ai_available()
+    inventory_ready = inventory_store.inventory_ready() and (
+        ai_connected or not ai_helper.ai_helper_required()
+    )
     return {
-        "status":           "ok",
+        "status":           "ok" if inventory_ready else "degraded",
+        "ai_helper_required": ai_helper.ai_helper_required(),
+        "ai_helper_connected": ai_connected,
+        "ai_helper_model": ai_helper.ai_helper_model(),
+        "ollama_status": "connected" if ai_connected else "unavailable",
         "ollama_enabled":   ollama_enabled,
         "ollama_connected": ollama_ok,
         "browser_ready":    True,       # Playwright is instantiated per-request
-        "inventory_ready":  inventory_store.inventory_ready(),
+        "inventory_ready":  inventory_ready,
         "cache_entries":    len(_cache),
         "saved_sites":      len(cred_store.list_sites()),
     }
@@ -389,6 +400,13 @@ async def global_error_handler(request: Request, exc: Exception):
 async def startup():
     logger.info("Sentinel Web Agent starting...")
     inventory_store.init_inventory_store()
+    if ai_helper.ai_helper_required() and not ai_helper.ai_available():
+        logger.warning(
+            "Required AI helper is unavailable. App will start degraded; "
+            "inventory requests will return 503 until the helper is ready."
+        )
+    elif ai_helper.ai_helper_enabled():
+        logger.info(f"AI helper ready: {ai_helper.ai_helper_provider()} {ai_helper.ai_helper_model()}")
     if not processor.is_ollama_enabled():
         logger.info("Ollama disabled: deterministic extraction mode")
     else:

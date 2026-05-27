@@ -8,6 +8,18 @@ services:
     envVars:
       - key: OLLAMA_ENABLED
         value: "false"
+      - key: AI_HELPER_ENABLED
+        value: "true"
+      - key: AI_HELPER_REQUIRED
+        value: "true"
+      - key: AI_HELPER_PROVIDER
+        value: "ollama"
+      - key: AI_HELPER_MODEL
+        value: "llama3.2:1b"
+      - key: AI_HELPER_HOST
+        value: "http://127.0.0.1:11434"
+      - key: AI_HELPER_TIMEOUT_S
+        value: "10"
       - key: HEADLESS
         value: "true"
       - key: SENTINEL_INVENTORY_CACHE_TTL_S

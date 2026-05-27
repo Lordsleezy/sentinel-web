@@ -7,6 +7,9 @@ from pathlib import Path
 
 os.environ["SENTINEL_BETA_USERS"] = "test@example.com"
 os.environ["SENTINEL_INVENTORY_CACHE_TTL_S"] = "720"
+os.environ["AI_HELPER_ENABLED"] = "true"
+os.environ["AI_HELPER_REQUIRED"] = "true"
+os.environ["AI_HELPER_MODEL"] = "llama3.2:1b"
 
 ROOT = Path(__file__).parent
 sys.path.insert(0, str(ROOT))
@@ -18,6 +21,7 @@ inventory_store.DATA_DIR = Path(_tmpdir.name)
 inventory_store.DB_PATH = inventory_store.DATA_DIR / "inventory_beta.db"
 
 import inventory_service
+import ai_helper
 from fastapi.testclient import TestClient
 from inventory_models import InventoryProviderResult
 
@@ -72,6 +76,25 @@ def main():
 
     with TestClient(api.app) as client:
         inventory_store.init_inventory_store()
+        ai_helper.ai_available = lambda: True
+        ai_helper.parse_inventory_query = lambda query: {
+            "intent": "inventory_lookup",
+            "product_query": query.replace(" near 10001", ""),
+            "sku": "",
+            "location": "10001" if "10001" in query else "",
+            "summary": "",
+            "best_option": "",
+            "confidence": 0.8,
+        }
+        ai_helper.summarize_inventory_results = lambda query, provider_results: {
+            "intent": "inventory_lookup",
+            "product_query": query,
+            "sku": "",
+            "location": "10001",
+            "summary": "Mock summary",
+            "best_option": "bestbuy",
+            "confidence": 0.9,
+        }
 
         health = client.get("/health")
         assert health.status_code == 200, health.text

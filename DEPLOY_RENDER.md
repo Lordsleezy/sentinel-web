@@ -1,13 +1,13 @@
 # Deploy SentinelWeb Backend to Render
 
-Render should use Docker for SentinelWeb because Playwright Chromium requires browser and system dependencies.
+Render should use Docker for SentinelWeb because Playwright Chromium and the tiny Ollama helper require system dependencies.
 
 ## Architecture
 
 - Frontend: Netlify at `https://sentinelprime.org`
 - Backend: Render Docker web service
 - Browser automation: Playwright Chromium inside Docker
-- AI/Ollama: disabled by default with `OLLAMA_ENABLED=false`
+- AI helper: Ollama with `llama3.2:1b`
 - Auth: Cloudflare Access or equivalent in front of the backend, plus SentinelWeb's invited-user allowlist
 
 ## Render setup
@@ -26,6 +26,12 @@ Render should use Docker for SentinelWeb because Playwright Chromium requires br
 
 ```env
 OLLAMA_ENABLED=false
+AI_HELPER_ENABLED=true
+AI_HELPER_REQUIRED=true
+AI_HELPER_PROVIDER=ollama
+AI_HELPER_MODEL=llama3.2:1b
+AI_HELPER_HOST=http://127.0.0.1:11434
+AI_HELPER_TIMEOUT_S=10
 HEADLESS=true
 ALLOWED_ORIGINS=https://sentinelprime.org,https://www.sentinelprime.org,http://localhost:5173,http://127.0.0.1:5173
 SENTINEL_BETA_USERS=user1@example.com,user2@example.com
@@ -51,11 +57,11 @@ X-Sentinel-User-Email: user@example.com
 
 The backend still checks `SENTINEL_BETA_USERS`, so Cloudflare/Render reachability alone does not grant inventory access.
 
-## No-AI behavior
+## Tiny AI behavior
 
-With `OLLAMA_ENABLED=false`:
+With `AI_HELPER_REQUIRED=true`:
 
-- Startup does not check Ollama.
-- `/health` reports `ollama_enabled: false`.
-- Inventory providers use deterministic extraction only.
-- Future Ollama support remains available by setting `OLLAMA_ENABLED=true`.
+- The app starts even if Ollama is unavailable, but `/health` reports degraded.
+- Inventory requests return `503 AI helper unavailable` until the model is ready.
+- Provider extraction remains deterministic.
+- The AI helper only sees cleaned query text and structured provider results.
