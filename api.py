@@ -30,6 +30,7 @@ import extractor
 import comparison as comp_engine
 import inventory_service
 import inventory_store
+import scrape_service
 from inventory_auth import require_inventory_user
 from browser import BrowserEngine, get_domain
 
@@ -151,6 +152,17 @@ class InventorySearchAccepted(BaseModel):
     status: str
     cache_hit: bool = False
     result: Optional[Dict[str, Any]] = None
+
+class ScrapeRequest(BaseModel):
+    target_url: str = Field(..., min_length=8, max_length=2000)
+    instructions: str = Field(default="Extract product listings and prices", max_length=1000)
+    max_pages: int = Field(default=3, ge=1, le=20)
+    cron_schedule: Optional[str] = Field(default=None, max_length=120)
+    wait: bool = False
+    wait_timeout_s: float = Field(default=20.0, ge=1.0, le=120.0)
+
+class ScoreRequest(BaseModel):
+    product: Dict[str, Any]
 
 
 # ─── Query endpoint ───────────────────────────────────────────────────────────
@@ -332,6 +344,44 @@ async def inventory_search_status(
     return result
 
 
+# Marketplace scrape queue endpoints
+
+@app.post("/scrape", status_code=202)
+async def scrape_endpoint(req: ScrapeRequest):
+    try:
+        job = await scrape_service.create_job(
+            target_url=req.target_url,
+            instructions=req.instructions,
+            max_pages=req.max_pages,
+            cron_schedule=req.cron_schedule,
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    if req.wait:
+        deadline = time.monotonic() + req.wait_timeout_s
+        while time.monotonic() < deadline:
+            current = await scrape_service.get_job(job["id"])
+            if current and current["status"] in {"completed", "failed"}:
+                return current
+            await asyncio.sleep(0.5)
+
+    return job
+
+
+@app.get("/jobs/{job_id}")
+async def scrape_job_status(job_id: str):
+    job = await scrape_service.get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Scrape job not found")
+    return job
+
+
+@app.post("/score")
+async def score_endpoint(req: ScoreRequest):
+    return await scrape_service.score_product_with_ollama(req.product)
+
+
 # ─── Credentials endpoints ────────────────────────────────────────────────────
 
 @app.post("/credentials/save", status_code=201)
@@ -377,6 +427,8 @@ async def health():
         "ollama_enabled":   ollama_enabled,
         "ollama_connected": ollama_ok,
         "browser_ready":    True,       # Playwright is instantiated per-request
+        "active_jobs_count": await scrape_service.active_jobs_count(),
+        "cloudflare_tunnel_compatible": True,
         "inventory_ready":  inventory_ready,
         "cache_entries":    len(_cache),
         "saved_sites":      len(cred_store.list_sites()),
@@ -399,6 +451,7 @@ async def global_error_handler(request: Request, exc: Exception):
 @app.on_event("startup")
 async def startup():
     logger.info("Sentinel Web Agent starting...")
+    await scrape_service.start_background_tasks()
     inventory_store.init_inventory_store()
     if ai_helper.ai_helper_required() and not ai_helper.ai_available():
         logger.warning(
@@ -426,5 +479,6 @@ async def startup():
 @app.on_event("shutdown")
 async def shutdown():
     from browser import stop_engine
+    await scrape_service.stop_background_tasks()
     await stop_engine()
     logger.info("Sentinel Web Agent shut down")
